@@ -51,8 +51,3 @@ daysLated %>%
   ggplot(aes(profession, result, fill = profession)) +
   geom_bar(stat = "identity")
 ```
-
-
-
-
-
