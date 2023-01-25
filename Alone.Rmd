@@ -40,12 +40,31 @@ library(psych)
 
 EDA
 ```{r}
-tuesdata$survival$profession
+tuesdata$survival
 str(tuesdata$survival)
+describe(tuesdata$survival)
+```
 
+Reason for dropping off
+```{r}
+tuesdata$survival$reason_category
+tuesdata$survival$reason_tapped_out %>%
+  ggplot(aes(reason_tapped_out)) +
+  geom_bar(stat = "identity")
+
+unique(tuesdata$survival$reason_tapped_out)
+
+tuesdata$survival %>%
+  drop_na(reason_tapped_out) %>%
+  count(reason_tapped_out, sort = TRUE) 
+```
+
+What profession made it longer than 80 days
+```{r}
 daysLated <- tuesdata$survival %>%
   select(profession, result, days_lasted) %>%
   filter(days_lasted > 80)
+
 
 daysLated %>%
   ggplot(aes(profession, result, fill = profession)) +
