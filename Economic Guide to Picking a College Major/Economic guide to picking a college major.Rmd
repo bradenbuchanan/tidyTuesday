@@ -18,6 +18,11 @@ library(scales)
 
 ```{r}
 recent_grads <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/recent-grads.csv")
+
+majors_processed <- recent_grads %>%
+  arrange(desc(Median)) %>%
+  mutate(Major = str_to_title(Major),
+         Major = fct_reorder(Major, Median))
 ```
 
 ```{r}
@@ -26,8 +31,10 @@ recent_grads %>%
 ```
 
 ### Most common majors
+
+What major categories (e.g. engineering, psychology, business) were most common?
 ```{r}
-recent_grads %>%
+majors_processed %>%
   count(Major_category, wt = Total, sort = TRUE) %>%
   mutate(Major_category = fct_reorder(Major_category, n)) %>%
   ggplot(aes(Major_category, n, fill = Major_category)) +
@@ -38,11 +45,10 @@ recent_grads %>%
   theme(legend.position = "none")
 ```
 
-
 ###What cateogies of majors make more money than others
 Boxplot of the Medians
 ```{r}
-recent_grads %>%
+majors_processed %>%
   mutate(Major_category = fct_reorder(Major_category, Median)) %>%
   ggplot(aes(Major_category, Median)) + 
   geom_boxplot() +
@@ -52,7 +58,7 @@ recent_grads %>%
 
 Barchart of the medians
 ```{r}
-recent_grads %>%
+majors_processed %>%
   mutate(Major_category = fct_reorder(Major_category, Median)) %>%
   group_by(Major_category) %>%
   summarize(Median = median(Median)) %>%
@@ -118,5 +124,72 @@ majors_processed %>%
        y = "Median salary of graduates",
        x = "")
 ```
+
+
+### How does gender breakdown relate to typical earnings?
+
+```{r}
+majors_processed %>%
+  arrange(desc(Total))%>%
+  head(20) %>%
+  mutate(Major = fct_reorder(Major, Total)) %>%
+  gather(Gender, Number, Men, Women) %>%
+  select(Major, Gender, Number) %>%
+  ggplot(aes(Major, Number, fill = Gender)) +
+  geom_col() +
+  scale_y_continuous(labels = comma_format()) +
+  coord_flip()
+```
+
+```{r}
+by_major_category <- majors_processed %>%
+  filter(!is.na(Total)) %>%
+  group_by(Major_category) %>%
+  summarize(Men = sum(Men),
+            Women = sum(Women),
+            Total = sum(Total),
+            MedianSalary = sum(Median * Sample_size)/sum(Sample_size)) %>%
+  mutate(ShareWomen = Women/Total) %>%
+  arrange(desc(ShareWomen))
+```
+
+```{r}
+library(ggrepel)
+
+by_major_category %>%
+  ggplot(aes(ShareWomen, MedianSalary)) +
+  geom_point() +
+  geom_smooth(method ="lm") +
+  geom_text_repel(aes(label = Major_category), force = .2) +
+  expand_limits(y = 0)
+```
+
+```{r}
+majors_processed %>%
+  ggplot(aes(ShareWomen, Median)) +
+  geom_point() +
+  geom_smooth(method ="lm") +
+  expand_limits(y = 0)
+```
+
+Weighted Linear Regression
+
+```{r}
+majors_processed %>%
+  select(Major, Total, ShareWomen, Sample_size, Median) %>%
+  lm(Median ~ ShareWomen, data = ., weights = Sample_size) %>%
+  summary()
+```
+
+```{r}
+majors_processed %>%
+  select(Major, Major_category, Total, ShareWomen, Sample_size, Median) %>%
+  add_count(Major_category) %>%
+  filter(n >= 10) %>%
+  count(Major_category)
+```
+
+
+
 
 
