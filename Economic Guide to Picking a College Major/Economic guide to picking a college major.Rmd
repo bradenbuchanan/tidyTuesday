@@ -25,6 +25,21 @@ recent_grads %>%
   view()
 ```
 
+### Most common majors
+```{r}
+recent_grads %>%
+  count(Major_category, wt = Total, sort = TRUE) %>%
+  mutate(Major_category = fct_reorder(Major_category, n)) %>%
+  ggplot(aes(Major_category, n, fill = Major_category)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = "",
+       y = "Total # of graudates") +
+  theme(legend.position = "none")
+```
+
+
+###What cateogies of majors make more money than others
 Boxplot of the Medians
 ```{r}
 recent_grads %>%
@@ -47,5 +62,61 @@ recent_grads %>%
   coord_flip()
 ```
 
+
+
+### What are the highest earning majors?
+```{r}
+majors_processed <- recent_grads %>%
+  arrange(desc(Median)) %>%
+  select(Major, Major_category, Median, P25th, P75th, Sample_size) %>%
+  mutate(Major = str_to_title(Major),
+         Major = fct_reorder(Major, Median))
+
+majors_processed %>%
+  head(20) %>%
+  ggplot(aes(Major, Median, color = Major_category)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = P25th, ymax = P75th)) +
+  expand_limits(y = 0) +
+  coord_flip()
+```
+
+What are the lowest earning majors?
+```{r}
+majors_processed %>%
+  tail(20) %>%
+  ggplot(aes(Major, Median, color = Major_category)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = P25th, ymax = P75th)) +
+  expand_limits(y = 0) +
+  coord_flip()
+```
+
+
+### 
+```{r}
+install.packages("ggrepel")
+library(ggrepel)
+
+majors_processed %>%
+  ggplot(aes(Sample_size, Median)) +
+  geom_point() +
+  geom_text(aes(label = Major), check_overlap = TRUE, vjust = 1, hjust = 1) +
+  scale_x_log10()
+
+majors_processed %>%
+  filter(Sample_size >= 100) %>%
+  head(20) %>%
+  ggplot(aes(Major, Median, color = Major_category)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = P25th, ymax = P75th)) +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = dollar_format()) +
+  coord_flip() +
+  labs(title = "What are the highest-earning majors?",
+       subtitle = "Top 20 majors with at least 100 graduates surveyed. Bars represent 25th and 75th percentile",
+       y = "Median salary of graduates",
+       x = "")
+```
 
 
