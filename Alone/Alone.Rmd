@@ -41,33 +41,65 @@ library(psych)
 EDA
 ```{r}
 tuesdata$survival
-str(tuesdata$survival)
-describe(tuesdata$survival)
+view(tuesdata$survivalists)
+survival <- tuesdata$survival
 ```
 
-Reason for dropping off
+Reason category most people dropped out
 ```{r}
-tuesdata$survival %>%
-  drop_na(reason_tapped_out) %>%
-  count(reason_category, reason_tapped_out, sort = TRUE)
+survival %>%
+  filter(!is.na(reason_category)) %>%
+  arrange(reason_category) %>%
+  select(reason_category) %>%
+  count(reason_category, sort = T) %>%
+  ggplot(aes(reason_category, n, fill = reason_category)) +
+  geom_col() +
+  labs(title = "Biggest reason category for dropping off",
+       y = "Number",
+       x = "") +
+  geom_text(aes(label = n), vjust = -1) +
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust=0.5, face = "bold"))
 ```
 
-Result finished in and what profession
+Who got first from each season
 ```{r}
-tuesdata$survival %>%
-  select(result, profession) %>%
-  count(result, profession, sort = T)
+survival %>%
+  filter(result == 1) %>%
+  select(gender, profession, result, season)
 ```
 
-
-What profession made it longer than 80 days
+Reasons why second place tapped out
 ```{r}
-daysLated <- tuesdata$survival %>%
-  select(profession, result, days_lasted) %>%
-  filter(days_lasted > 80)
-
-
-daysLated %>%
-  ggplot(aes(profession, result, fill = profession)) +
-  geom_bar(stat = "identity")
+survival %>%
+  filter(result == 2) %>%
+  select(gender, profession, result, season, reason_tapped_out)
 ```
+
+Most common reasons for tapping out
+```{r}
+survival %>%
+  filter(!is.na(reason_tapped_out)) %>%
+  arrange(reason_tapped_out) %>%
+  count(reason_tapped_out, reason_category,sort = TRUE) %>%
+  head(6) %>%
+  ggplot(aes(reason_tapped_out, n, fill = reason_category)) +
+  geom_col() +
+  labs(title = "Most common reasons for tapping out",
+       y = "Number",
+       x = "Reason tapped out") +
+  geom_text(aes(label = n), hjust = -1) +
+  theme(panel.background = element_blank(),
+        plot.title = element_text(hjust=0.5, face = "bold")) +
+  coord_flip()
+```
+
+Average days lasted for first place?
+```{r}
+survival %>%
+  filter(result == 1) %>%
+  arrange(desc(days_lasted)) %>%
+  select(season, result, days_lasted) %>%
+  mutate(Average_days_first_place = mean(days_lasted))
+```
+
