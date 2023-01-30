@@ -1,0 +1,33 @@
+---
+title: "Washington Trails"
+author: "Braden Buchanan"
+date: "2023-01-30"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+load data
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2020-11-24')
+```
+
+Cleaning script - provided by authors
+```{r}
+
+```
+
+
+```{r}
+view(tuesdata)
+str(tuesdata)
+head(tuesdata)
+```
