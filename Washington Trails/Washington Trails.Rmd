@@ -77,3 +77,29 @@ view(trailData)
 str(trailData)
 head(trailData)
 ```
+
+What are the longest hikes in Washington?
+```{r}
+trailData %>%
+  select(name, location_region, length_miles, gain) %>%
+  arrange(desc(length_miles)) %>%
+  unique() %>%
+  head(20)
+```
+
+How many unique hiking regions are there?
+```{r}
+trailData %>%
+  select(location_region) %>%
+  arrange(desc(location_region)) %>%
+  unique()
+```
+
+What regions have the most hiking trails?
+```{r}
+trailData %>%
+  select(location_region) %>%
+  arrange(desc(location_region)) %>%
+  unique()
+```
+
