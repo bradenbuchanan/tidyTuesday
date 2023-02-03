@@ -98,8 +98,27 @@ trailData %>%
 What regions have the most hiking trails?
 ```{r}
 trailData %>%
-  select(location_region) %>%
-  arrange(desc(location_region)) %>%
-  unique()
+  group_by(location_region) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+
+trailData %>%
+  filter(location_region == "North Cascades") %>%
+  summarize(count=n())
+
+
+trailData %>%
+  group_by(location_region) %>%
+  summarize(count = n()) %>%
+  mutate(location_region = fct_reorder(location_region, count)) %>%
+  ggplot(aes(location_region, count, fill = location_region)) +
+  geom_col() +
+  geom_text(aes(label = count), position = position_dodge(0.9), hjust = 1.2, color = "white") +
+  labs(y = "Number of hikes in each region",
+       x = "Hiking regions",
+       ) + 
+  scale_fill_discrete(name = "Hiking regions") +
+  coord_flip() + 
+  theme(panel.background = element_blank())
 ```
 
