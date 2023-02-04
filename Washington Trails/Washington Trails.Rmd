@@ -152,7 +152,7 @@ outliers <- trailData %>%
   filter(gain > 6000) %>%
   select(name, gain, length_miles) %>%
   distinct() %>%
-  mutate(outlier = ifelse(gain > quantile(gain, 0.75), "Outlier", "Not Outlier"))
+  mutate(outlier = ifelse(gain > quantile(gain, 0.85), "Outlier", "Not Outlier"))
 
 # plot data with outliers labeled
 ggplot(outliers, aes(x = length_miles, y = gain, color = outlier)) +
@@ -162,7 +162,11 @@ ggplot(outliers, aes(x = length_miles, y = gain, color = outlier)) +
   ggtitle("Correlation between gain and length_miles") +
   xlab("Length (miles)") +
   ylab("Gain (feet)") +
+  geom_smooth(method = "lm", se = FALSE) + 
   theme_classic()
+
+lm.1 <- lm(gain ~ length_miles, trailData)
+summary(lm.1)
 ```
 
 
