@@ -95,6 +95,12 @@ trailData %>%
   unique()
 ```
 
+How many total hikes are there in Washington?
+```{r}
+trailData %>%
+  summarize(count = n_distinct(name))
+```
+
 What regions have the most hiking trails?
 ```{r}
 trailData %>%
@@ -104,21 +110,59 @@ trailData %>%
 
 trailData %>%
   filter(location_region == "North Cascades") %>%
-  summarize(count=n())
+  summarize(count=n_distinct(name))
 
 
 trailData %>%
   group_by(location_region) %>%
-  summarize(count = n()) %>%
+  summarize(count=n_distinct(name)) %>%
   mutate(location_region = fct_reorder(location_region, count)) %>%
   ggplot(aes(location_region, count, fill = location_region)) +
   geom_col() +
   geom_text(aes(label = count), position = position_dodge(0.9), hjust = 1.2, color = "white") +
-  labs(y = "Number of hikes in each region",
+  labs(y = "Number of hikes",
        x = "Hiking regions",
+       title = "Number of hikes per hiking region in Washington"
        ) + 
-  scale_fill_discrete(name = "Hiking regions") +
   coord_flip() + 
-  theme(panel.background = element_blank())
+  theme(panel.background = element_blank(),
+        legend.position = "none")
 ```
+
+What hikes have the most elevation gain?
+```{r}
+trailData %>%
+  filter(gain > 6000) %>%
+  select(name, gain, length_miles) %>%
+  distinct() %>%
+  arrange(desc(gain)) %>%
+  head(20)
+```
+
+Correlation between length_miles and gain
+```{r}
+trailData %>%
+  ggplot(aes(length_miles, gain)) +
+  geom_point() +
+  labs(x = "Length of the hike (miles)", y = "Elevation gain (feet)", title = "Correlation between hike length and elevation gain") +
+  theme_minimal()
+
+
+outliers <- trailData %>%
+  filter(gain > 6000) %>%
+  select(name, gain, length_miles) %>%
+  distinct() %>%
+  mutate(outlier = ifelse(gain > quantile(gain, 0.75), "Outlier", "Not Outlier"))
+
+# plot data with outliers labeled
+ggplot(outliers, aes(x = length_miles, y = gain, color = outlier)) +
+  geom_point() +
+  geom_text(aes(label = ifelse(outlier == "Outlier", name, "")),
+            hjust = 0, vjust = 0, size = 3) +
+  ggtitle("Correlation between gain and length_miles") +
+  xlab("Length (miles)") +
+  ylab("Gain (feet)") +
+  theme_classic()
+```
+
 
