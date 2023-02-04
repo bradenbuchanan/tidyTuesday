@@ -144,9 +144,10 @@ Correlation between length_miles and gain
 trailData %>%
   ggplot(aes(length_miles, gain)) +
   geom_point() +
-  labs(x = "Length of the hike (miles)", y = "Elevation gain (feet)", title = "Correlation between hike length and elevation gain") +
+  labs(x = "Length of the hike (miles)", 
+       y = "Elevation gain (feet)", 
+       title = "Correlation between hike length and elevation gain") +
   theme_minimal()
-
 
 outliers <- trailData %>%
   filter(gain > 6000) %>%
@@ -169,4 +170,74 @@ lm.1 <- lm(gain ~ length_miles, trailData)
 summary(lm.1)
 ```
 
+Whats the highest point in Washington? What hikes lead to the highest points?
+```{r}
+trailData %>%
+  filter(highpoint > 8500) %>%
+  select(name, location_region, highpoint) %>%
+  distinct() %>%
+  arrange(desc(highpoint))
+
+trailData %>%
+  filter(highpoint > 8500) %>%
+  select(name, location_region, highpoint) %>%
+  distinct() %>%
+  arrange(desc(highpoint)) %>%
+  mutate(name = fct_reorder(name, highpoint)) %>%
+  ggplot(aes(x = name, y = highpoint, fill = location_region)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = highpoint), position = position_dodge(0.9), hjust = 1.2, color = "white") +
+  xlab("Peak Name") +
+  ylab("Highpoint (ft)") +
+  ggtitle("Highpoint Elevation of Peaks") +
+  theme(panel.background = element_blank()) +
+  coord_flip()
+```
+
+Types of features on hikes
+```{r}
+trailData %>%
+  select(features_unnest) %>%
+  distinct()
+```
+
+Filtering for hikes with only summits and mountain views
+```{r}
+trailData %>%
+  filter(features_unnest == "Summits" | features_unnest == "Mountain views") %>%
+  select(name, location_region, length_miles, features_unnest) %>%
+  arrange(desc(length_miles)) %>%
+  head(25) %>%
+  print(n = 25)
+```
+
+What are the worst rated hikes in Washington?
+```{r}
+trailData %>%
+  filter(rating < 1) %>%
+  select(name, location_region, rating) %>%
+  distinct()
+```
+
+Which is the average hiking rating per location region?
+```{r}
+trailData %>%
+  group_by(location_region) %>%
+  summarize(avg_rating = mean(rating))
+
+trailData %>%
+  group_by(location_region) %>%
+  summarize(avg_rating = mean(rating)) %>%
+  mutate(avg_rating = round(avg_rating, 2),
+         location_region = fct_reorder(location_region, avg_rating)) %>%
+  ggplot(aes(location_region, avg_rating, fill = location_region)) +
+  geom_col() +
+  scale_fill_discrete(guide = FALSE) +
+  coord_flip() +
+  theme(panel.background = element_blank()) +
+  geom_text(aes(label = avg_rating), position = position_dodge(0.9), hjust = 1.2, color = "white") +
+  labs(title = "Average hiking rating per location region", 
+       x = "Location region", 
+       y = "Avg rating")
+```
 
