@@ -139,4 +139,62 @@ trailData %>%
   head(20)
 ```
 
+Correlation between length_miles and gain
+```{r}
+trailData %>%
+  ggplot(aes(length_miles, gain)) +
+  geom_point() +
+  labs(x = "Length of the hike (miles)", 
+       y = "Elevation gain (feet)", 
+       title = "Correlation between hike length and elevation gain") +
+  theme_minimal()
+
+outliers <- trailData %>%
+  filter(gain > 6000) %>%
+  select(name, gain, length_miles) %>%
+  distinct() %>%
+  mutate(outlier = ifelse(gain > quantile(gain, 0.85), "Outlier", "Not Outlier"))
+
+# plot data with outliers labeled
+ggplot(outliers, aes(x = length_miles, y = gain, color = outlier)) +
+  geom_point() +
+  geom_text(aes(label = ifelse(outlier == "Outlier", name, "")),
+            hjust = 0, vjust = 0, size = 3) +
+  ggtitle("Correlation between gain and length_miles") +
+  xlab("Length (miles)") +
+  ylab("Gain (feet)") +
+  geom_smooth(method = "lm", se = FALSE) + 
+  theme_classic()
+
+lm.1 <- lm(gain ~ length_miles, trailData)
+summary(lm.1)
+```
+
+Whats the highest point in Washington? What hikes lead to the highest points?
+```{r}
+trailData %>%
+  filter(highpoint > 8500) %>%
+  select(name, location_region, highpoint) %>%
+  distinct() %>%
+  arrange(desc(highpoint))
+
+trailData %>%
+  filter(highpoint > 8500) %>%
+  select(name, location_region, highpoint) %>%
+  distinct() %>%
+  arrange(desc(highpoint)) %>%
+  mutate(name = fct_reorder(name, highpoint)) %>%
+  ggplot(aes(x = name, y = highpoint, fill = location_region)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = highpoint), position = position_dodge(0.9), hjust = 1.2, color = "white") +
+  xlab("Peak Name") +
+  ylab("Highpoint (ft)") +
+  ggtitle("Highpoint Elevation of Peaks") +
+  theme(panel.background = element_blank()) +
+  coord_flip()
+```
+
+```{r}
+head(trailData)
+```
 
