@@ -219,7 +219,7 @@ trailData %>%
   distinct()
 ```
 
-Which is the average hiking rating per location region?
+What is the average hiking rating per location region?
 ```{r}
 trailData %>%
   group_by(location_region) %>%
@@ -240,4 +240,3 @@ trailData %>%
        x = "Location region", 
        y = "Avg rating")
 ```
-

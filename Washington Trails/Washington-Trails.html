@@ -869,7 +869,7 @@ points?</p>
 ##  9 Riverside State Park - Trail 25 Trail 410 Loop Eastern Washington           0
 ## 10 Kalispell Rock                                 Eastern Washington           0
 ## # … with 282 more rows</code></pre>
-<p>Which is the average hiking rating per location region?</p>
+<p>What is the average hiking rating per location region?</p>
 <pre class="r"><code>trailData %&gt;%
   group_by(location_region) %&gt;%
   summarize(avg_rating = mean(rating))</code></pre>
