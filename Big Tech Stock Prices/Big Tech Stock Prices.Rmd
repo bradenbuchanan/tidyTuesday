@@ -12,3 +12,86 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Big Tech Stock Prices
+
+load packages
+```{r}
+library(tidyverse)
+library(plotly)
+library(tidyquant)
+```
+
+Load data
+```{r}
+big_tech_stock_prices <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-02-07/big_tech_stock_prices.csv')
+big_tech_companies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-02-07/big_tech_companies.csv')
+```
+
+View data
+```{r}
+view(big_tech_companies)
+view(big_tech_stock_prices)
+```
+
+join data sets
+```{r}
+stock_data <- inner_join(big_tech_companies, big_tech_stock_prices, by = "stock_symbol")
+```
+
+What companies are included in this data set?
+```{r}
+stock_data %>%
+  select(company) %>%
+  distinct()
+
+stock_data %>%
+  select(stock_symbol) %>%
+  distinct()
+```
+
+FANG candlestick chart
+```{r}
+stock_data %>%
+    filter(stock_symbol %in% c("AAPL", "AMZN", "GOOGL", "NFLX", "META")) %>%
+  ggplot(aes(x = date, y = close, group = stock_symbol)) +
+  geom_candlestick(aes(open = open, high = high, low = low, close = close)) +
+  labs(title = "FANG Candlestick Chart", 
+         subtitle = "Experimenting with Mulitple Stocks",
+         y = "Closing Price", x = "") +
+  facet_wrap(~ stock_symbol, ncol = 2, scale = "free_y") + 
+  theme_tq()
+
+
+stock_data %>%
+  filter(stock_symbol %in% c("AAPL", "AMZN", "GOOGL", "NFLX", "META"), date >= as.Date("2022-01-01"))
+```
+
+
+```{r}
+stock_data %>%
+  filter(stock_symbol == "AAPL") %>%
+  ggplot(aes(date, adj_close)) +
+  geom_col() +
+  theme(panel.background = element_blank())
+```
+
+Candle stick plot for Apple
+```{r}
+stock_data %>%
+  filter(stock_symbol == "AAPL") %>%
+  ggplot(aes(date, close)) +
+  geom_candlestick(aes(open = open, high = high, low = low, close = close)) +
+  labs(title = "AAPL Candlestick Chart", y = "Closing Price", x = "") +
+    theme_tq()
+```
+
+Line chart for Apple
+```{r}
+stock_data %>%
+  filter(stock_symbol == "AAPL") %>%
+  ggplot(aes(x = date, y = close)) +
+    geom_line() +
+    labs(title = "AAPL Line Chart", y = "Closing Price", x = "") + 
+    theme_tq()
+```
+
+
