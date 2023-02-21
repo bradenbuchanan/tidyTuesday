@@ -1,0 +1,56 @@
+---
+title: "Ulta Trail Running"
+author: "Braden Buchanan"
+date: "2023-02-21"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+load packages
+```{r}
+library(tidyverse)
+library(psych)
+```
+
+load data
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2021-10-26')
+tuesdata <- tidytuesdayR::tt_load(2021, week = 44)
+```
+
+View data
+```{r}
+rankings <- tuesdata$ultra_rankings
+race <- tuesdata$race
+```
+
+Join data
+```{r}
+data <- inner_join(race, rankings, by = "race_year_id")
+view(data)
+```
+
+Cleaning data
+```{r}
+str(data)
+head(data$time)
+head(data$start_time)
+
+#lower casing all names
+data$runner <- tolower(data$runner)
+
+# Figuring out time
+time_components <- strsplit(data$time, " ")
+time_seconds <- sapply(lapply(time_components, function(x) {
+  as.numeric(x[1])*3600 + as.numeric(x[2])*60 + as.numeric(x[3])
+}), as.numeric)
+
+head(data$time_seconds)
+
+```
+
