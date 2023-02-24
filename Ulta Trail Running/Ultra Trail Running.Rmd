@@ -40,9 +40,11 @@ Cleaning data
 str(data)
 head(data$time)
 head(data$start_time)
+tail(data)
 
 #lower casing all names
 data$runner <- tolower(data$runner)
+head(data$runner)
 
 # Figuring out time
 time_components <- strsplit(data$time, " ")
@@ -51,6 +53,38 @@ time_seconds <- sapply(lapply(time_components, function(x) {
 }), as.numeric)
 
 head(data$time_seconds)
+```
 
+
+mutate(Major = fct_reorder(Major, Total)) %>%
+What's the longest ultra?
+```{r}
+data %>%
+  select(distance, race) %>%
+  arrange(desc(distance)) %>%
+  distinct() %>%
+  head(25)
+```
+
+What's the shortest ultra?
+```{r}
+data %>%
+  select(distance) %>%
+  arrange(desc(distance)) %>%
+  distinct() %>%
+  tail(20)
+```
+
+Who has the most 1st places in ultras?
+```{r}
+data %>%
+  select(runner, rank, country) %>%
+  filter(rank == "1") %>%
+  count(runner) %>%
+  arrange(desc(n)) %>%
+  mutate(runner = fct_reorder(runner, n)) %>%
+  head(15) %>%
+  ggplot(aes(n, runner)) +
+  geom_col()
 ```
 
